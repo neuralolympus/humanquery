@@ -65,9 +65,12 @@ function LoadingRotator() {
   );
 }
 
+const QUERY_USER_FIX_CODES = new Set(['QUERY_NOT_APPLICABLE', 'QUERY_SCHEMA_MISMATCH']);
+
 function CodePanelComponent(props: {
   loading: boolean;
   error: string | null;
+  errorCode: string | null;
   activeTab: CodeTab;
   onTabChange: (t: CodeTab) => void;
   generated: GeneratedQuery | null;
@@ -75,7 +78,8 @@ function CodePanelComponent(props: {
   formatted: string | null;
   outputType: OutputType;
 }) {
-  const { loading, error, activeTab, onTabChange, generated, result, formatted, outputType } = props;
+  const { loading, error, errorCode, activeTab, onTabChange, generated, result, formatted, outputType } =
+    props;
 
   const codeRef = useRef<HTMLElement | null>(null);
 
@@ -154,8 +158,13 @@ function CodePanelComponent(props: {
             <LoadingRotator />
           </div>
         ) : error ? (
-          <div role="alert" className="alert alert-error">
-            <span className="font-mono text-xs">{error}</span>
+          <div
+            role="alert"
+            className={`alert font-mono text-xs ${
+              errorCode && QUERY_USER_FIX_CODES.has(errorCode) ? 'alert-warning' : 'alert-error'
+            }`}
+          >
+            <span>{error}</span>
           </div>
         ) : activeTab === 'results' ? (
           result ? (

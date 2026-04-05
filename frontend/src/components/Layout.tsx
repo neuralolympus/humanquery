@@ -21,6 +21,7 @@ export interface LayoutProps {
   outputType: OutputType;
   loading: boolean;
   error: string | null;
+  errorCode: string | null;
   last: QueryResponse | null;
   history: HistoryItem[];
   onOpenConnectionModal: () => void;
@@ -53,6 +54,7 @@ function LayoutComponent(props: LayoutProps) {
     outputType,
     loading,
     error,
+    errorCode,
     last,
     history,
     onOpenConnectionModal,
@@ -114,6 +116,7 @@ function LayoutComponent(props: LayoutProps) {
               onToggleSchemaDrawer={onToggleSchemaDrawer}
             />
             <QueryInput
+              schema={schema}
               value={queryText}
               outputType={outputType}
               onChange={onQueryChange}
@@ -124,6 +127,7 @@ function LayoutComponent(props: LayoutProps) {
             <CodePanel
               loading={loading}
               error={error}
+              errorCode={errorCode}
               activeTab={activeTab}
               onTabChange={onTabChange}
               generated={generated}

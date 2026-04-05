@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  ApiError,
   fetchConnections,
   fetchHistory,
   introspect,
@@ -30,6 +31,7 @@ export default function App() {
   const [outputType, setOutputType] = useState<OutputType>('table');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [last, setLast] = useState<QueryResponse | null>(null);
   const [activeTab, setActiveTab] = useState<CodeTab>('results');
   const [schemaDrawerOpen, setSchemaDrawerOpen] = useState(false);
@@ -86,6 +88,7 @@ export default function App() {
     if (!activeId || !queryText.trim()) return;
     setLoading(true);
     setError(null);
+    setErrorCode(null);
     try {
       const res = await runQuery({
         connectionId: activeId,
@@ -97,7 +100,13 @@ export default function App() {
       const h = await fetchHistory(activeId);
       setHistory(h);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Request failed');
+      if (e instanceof ApiError) {
+        setError(e.message);
+        setErrorCode(e.code ?? null);
+      } else {
+        setError(e instanceof Error ? e.message : 'Request failed');
+        setErrorCode(null);
+      }
       setLast(null);
     } finally {
       setLoading(false);
@@ -127,6 +136,7 @@ export default function App() {
         outputType={outputType}
         loading={loading}
         error={error}
+        errorCode={errorCode}
         last={last}
         history={history}
         onOpenConnectionModal={openConnectionModal}

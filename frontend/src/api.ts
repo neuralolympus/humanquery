@@ -1,5 +1,15 @@
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
+export class ApiError extends Error {
+  readonly code?: string;
+
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.code = code;
+  }
+}
+
 export type Dialect = 'postgresql' | 'mysql' | 'mssql' | 'sqlite';
 
 export interface ConnectionListItem {
@@ -61,8 +71,8 @@ export interface HistoryItem {
 
 async function j<T>(r: Response): Promise<T> {
   if (!r.ok) {
-    const err = (await r.json().catch(() => ({}))) as { error?: string };
-    throw new Error(err.error ?? r.statusText);
+    const err = (await r.json().catch(() => ({}))) as { error?: string; code?: string };
+    throw new ApiError(err.error ?? r.statusText, err.code);
   }
   return r.json() as Promise<T>;
 }

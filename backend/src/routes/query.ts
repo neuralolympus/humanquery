@@ -9,6 +9,7 @@ import type { DBConnection, OutputType } from '../types.js';
 import { execute } from '../services/executor.js';
 import { format } from '../services/formatter.js';
 import { introspect } from '../services/introspector.js';
+import { isQueryRejectedError } from '../errors.js';
 import { generateQuery } from '../services/llm.js';
 
 const OUTPUTS: OutputType[] = ['table', 'json', 'csv', 'count'];
@@ -57,6 +58,9 @@ export async function registerQueryRoutes(app: FastifyInstance) {
     try {
       generated = await generateQuery(schema, nlQuery.trim(), connection.dialect);
     } catch (e) {
+      if (isQueryRejectedError(e)) {
+        return reply.code(422).send({ error: e.message, code: e.code });
+      }
       const msg = e instanceof Error ? e.message : 'LLM generation failed';
       return reply.code(502).send({ error: msg });
     }

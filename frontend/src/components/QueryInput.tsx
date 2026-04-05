@@ -1,14 +1,10 @@
-import type { OutputType } from '../api';
+import { useMemo } from 'react';
+import type { OutputType, SchemaTable } from '../api';
+import { buildSchemaQuickPrompts, schemaQueryPlaceholder } from '../lib/schemaQuickPrompts';
 import { IconPlay } from './Icons';
 
-const EXAMPLES = [
-  'top customers 30d',
-  'revenue by country',
-  'low stock products',
-  'pending orders today',
-];
-
 export function QueryInput(props: {
+  schema: SchemaTable[];
   value: string;
   outputType: OutputType;
   onChange: (v: string) => void;
@@ -16,7 +12,10 @@ export function QueryInput(props: {
   onRun: () => void;
   disabled?: boolean;
 }) {
-  const { value, outputType, onChange, onOutputTypeChange, onRun, disabled } = props;
+  const { schema, value, outputType, onChange, onOutputTypeChange, onRun, disabled } = props;
+
+  const quickPrompts = useMemo(() => buildSchemaQuickPrompts(schema, 6), [schema]);
+  const placeholder = useMemo(() => schemaQueryPlaceholder(schema), [schema]);
 
   const queryId = 'nl-query-input';
   const outputId = 'query-output-format';
@@ -31,7 +30,7 @@ export function QueryInput(props: {
           <textarea
             id={queryId}
             className="textarea textarea-bordered h-16 w-full resize-none font-mono text-sm leading-relaxed transition-[box-shadow,border-color]"
-            placeholder="e.g. Show top 5 customers by order value in the last 30 days..."
+            placeholder={placeholder}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
@@ -72,18 +71,24 @@ export function QueryInput(props: {
           </select>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {EXAMPLES.map((ex) => (
-            <button
-              key={ex}
-              type="button"
-              className="badge badge-outline badge-sm cursor-pointer font-mono hover:badge-success"
-              onClick={() => onChange(ex)}
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
+        {quickPrompts.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {quickPrompts.map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                className="badge badge-outline badge-sm max-w-full cursor-pointer break-words font-mono hover:badge-success"
+                onClick={() => onChange(ex)}
+              >
+                {ex}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="font-mono text-xs text-base-content/50">
+            Load a connection to see example prompts from your schema.
+          </p>
+        )}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ flowchart LR
   end
   subgraph api [Fastify API]
     Introspect[Introspect schema]
-    LLM[OpenAI via ax-llm]
+    LLM[OpenAI primary, Gemini fallback]
     Exec[Execute read-only SQL]
     Hist[SQLite metadata and history]
   end
@@ -36,7 +36,7 @@ flowchart LR
 
 1. You save a database connection (connection string is encrypted on disk).
 2. The backend introspects the schema (with configurable cache TTL).
-3. Your question and schema DDL are sent to **your** OpenAI account to generate SQL and ORM snippets.
+3. Your question and schema DDL are sent to **your** OpenAI account first (Gemini is used automatically if OpenAI fails and a Gemini key is configured).
 4. The app executes the generated SQL and returns formatted results; queries are logged to local history.
 
 ## Quick start
@@ -44,16 +44,14 @@ flowchart LR
 ### Prerequisites
 
 - Node.js 20+ recommended
-- An [OpenAI API key](https://platform.openai.com/) for query generation
-OR 
-Use GEMINI API KEY from Google AI studio 
+- An [OpenAI API key](https://platform.openai.com/) for query generation (primary), and optionally a [Gemini API key](https://aistudio.google.com/) as fallback
 
 ### Backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env: set OPENAI_API_KEY / GEMINI and ENCRYPTION_KEY (any strong secret; used to derive AES-256-GCM keys)
+# Edit .env: set OPENAI_API_KEY (and optionally GEMINI_API_KEY for fallback), plus ENCRYPTION_KEY
 npm install
 npm run dev
 ```
@@ -76,10 +74,13 @@ Open the URL Vite prints (usually `http://localhost:5173`). Add a connection in 
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `OPENAI_API_KEY` | Yes | OpenAI API key |
-| `GEMINI_API_KEY` | Yes | Google Gemini API key |
+| `OPENAI_API_KEY` | Yes* | OpenAI API key (primary LLM) |
+| `GEMINI_API_KEY` | No** | Google Gemini; used if OpenAI fails, or alone if OpenAI is unset |
 | `ENCRYPTION_KEY` | Yes | Secret used to encrypt stored connection strings |
 | `OPENAI_MODEL` | No | Default `gpt-4.1` |
+
+\* At least one of `OPENAI_API_KEY` or `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) must be set.  
+\** Recommended when using OpenAI so outages or rate limits can fall back to Gemini.
 | `PORT` | No | Default `3001` |
 | `MAX_ROWS` | No | Cap on rows returned (default `1000`, max `10000`) |
 | `SCHEMA_CACHE_TTL_SECONDS` | No | Schema cache TTL (default `300`) |
@@ -99,7 +100,7 @@ Serve `frontend/dist` with any static host and point `VITE_API_URL` at your API 
 ## Security and trust
 
 - **Generated SQL is executed** against the database you connect. Treat prompts like code: use **read-only database users** or replicas for exploration, especially on shared or production data.
-- **Schema and questions** are sent to OpenAI when you run a query. Do not connect datasets you are not allowed to expose to a third-party API.
+- **Schema and questions** are sent to OpenAI (or Gemini if OpenAI fails and fallback is configured) when you run a query. Do not connect datasets you are not allowed to expose to a third-party API.
 - **Connection strings** are encrypted at rest under `backend/data/humanquery.local.sqlite` using `ENCRYPTION_KEY`. Back up and protect that file and your `.env`.
 
 This project does not replace a formal security review or database access policy.
