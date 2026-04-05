@@ -3,6 +3,34 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "author": "rayDcode",
+  "license": "MIT",
+  "homepage": "https://github.com/neuralolympus/humanquery",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neuralolympus/humanquery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neuralolympus/humanquery/issues"
+  },
+  "keywords": [
+    "humanquery",
+    "database",
+    "query",
+    "sql",
+    "orm",
+    "prisma",
+    "typeorm",
+    "sequelize",
+    "sqlalchemy",
+    "django",
+    "orm",
+    "prisma",
+    "typeorm",
+    "sequelize",
+    "sqlalchemy",
+    "django"
+  ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",

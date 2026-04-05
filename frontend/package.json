@@ -3,6 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "rayDcode",
+  "license": "MIT",
+  "homepage": "https://github.com/neuralolympus/humanquery",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neuralolympus/humanquery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neuralolympus/humanquery/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
