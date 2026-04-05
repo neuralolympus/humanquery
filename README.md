@@ -111,7 +111,7 @@ This project does not replace a formal security review or database access policy
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS, DaisyUI |
 | Backend | Fastify 5, TypeScript |
 | Databases | `pg`, `mysql2`, `mssql`, `better-sqlite3` |
-| LLM | `@ax-llm/ax`, OpenAI |
+| LLM | `@ax-llm/ax`, OpenAI,Google GEMINI |
 
 ## Repository layout
 
